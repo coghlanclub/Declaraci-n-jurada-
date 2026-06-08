@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Declaración Jurada de Salud</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --primary-light: #e8f0f8;
+    --accent: #2e7d5e;
+    --accent-light: #e8f5f0;
+    --danger: #c0392b;
+    --danger-light: #fdecea;
+    --gray: #6b7280;
+    --gray-light: #f4f5f7;
+    --border: #d1d5db;
+    --text: #1f2937;
+    --text-muted: #6b7280;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #f0f4f8;
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  .header {
+    background: var(--primary);
+    color: white;
+    padding: 1.5rem 1.25rem 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-badge {
+    font-family: 'Arial Narrow', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 4px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.3;
+    color: white;
+  }
+
+  .progress-bar {
+    margin-top: 12px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 99px;
+    height: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #7ecfb3;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 5px;
+    font-family: sans-serif;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
+
+  .section-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    font-family: sans-serif;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-num {
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: block;
+    font-family: sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 5px;
+  }
+
+  label .req {
+    color: var(--danger);
+    margin-left: 2px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    font-size: 16px;
+    font-family: sans-serif;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  input.error, textarea.error {
+    border-color: var(--danger);
+    background: var(--danger-light);
+  }
+
+  textarea { resize: none; min-height: 72px; }
+
+  .hint {
+    font-family: sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .radio-btn {
+    flex: 1;
+    position: relative;
+  }
+
+  .radio-btn input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .radio-btn label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray);
+    transition: all 0.18s;
+    margin: 0;
+  }
+
+  .radio-btn input:checked + label {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .radio-btn.si input:checked + label {
+    border-color: var(--danger);
+    background: var(--danger-light);
+    color: var(--danger);
+  }
+
+  .radio-btn.noapl input:checked + label {
+    border-color: var(--gray);
+    background: var(--gray-light);
+    color: var(--text);
+  }
+
+  .question-item {
+    margin-bottom: 1.1rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .question-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .question-text {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .question-num {
+    font-weight: bold;
+    color: var(--primary);
+    margin-right: 4px;
+  }
+
+  .hidden { display: none !important; }
+
+  #detalle-si-wrap {
+    background: var(--danger-light);
+    border: 1.5px solid #f5c6c2;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 1rem;
+  }
+
+  #detalle-si-wrap label {
+    color: var(--danger);
+    font-size: 13px;
+  }
+
+  .legal-text {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text);
+    font-family: sans-serif;
+    background: var(--gray-light);
+    border-left: 3px solid var(--primary);
+    padding: 12px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 1rem;
+  }
+
+  .check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: sans-serif;
+    color: var(--text);
+    line-height: 1.5;
+    font-weight: normal;
+  }
+
+  .check-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--primary);
+    margin-top: 1px;
+    cursor: pointer;
+  }
+
+  .signature-area {
+    margin-top: 0.5rem;
+  }
+
+  .sig-label {
+    font-family: sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sig-clear {
+    font-size: 12px;
+    color: var(--danger);
+    cursor: pointer;
+    font-weight: normal;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  #sig-canvas {
+    width: 100%;
+    height: 160px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: white;
+    touch-action: none;
+    cursor: crosshair;
+    display: block;
+  }
+
+  #sig-canvas.error {
+    border-color: var(--danger);
+    background: var(--danger-light);
+  }
+
+  .sig-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 5px;
+    font-family: sans-serif;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: bold;
+    font-family: sans-serif;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .error-msg {
+    font-family: sans-serif;
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 4px;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  #success-screen {
+    display: none;
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--accent-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 28px;
+  }
+
+  #success-screen h2 {
+    font-size: 20px;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+
+  #success-screen p {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-pdf {
+    display: inline-block;
+    padding: 14px 28px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: bold;
+    font-family: sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .btn-nuevo {
+    display: inline-block;
+    padding: 12px 28px;
+    background: transparent;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: bold;
+    font-family: sans-serif;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .info-banner {
+    background: var(--primary-light);
+    border: 1px solid #c2d5ea;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .menores-section {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 10px;
+  }
+
+  .menores-section .section-title-sm {
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #92400e;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  #loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #loading-overlay.visible { display: flex; }
+
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #loading-overlay p {
+    color: white;
+    font-family: sans-serif;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>Generando PDF...</p>
+</div>
+
+<div class="header">
+  <div class="header-badge">Conforme Ley N° 5.397 (CABA) / Ley N° 12.329 (Prov. Bs. As.)</div>
+  <h1>Declaración Jurada de Salud<br>y Asunción de Riesgo</h1>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="progress-label" id="progress-label">0% completado</div>
+</div>
+
+<div class="container">
+
+  <div id="form-container">
+
+    <div class="info-banner">
+      📋 Complete todos los campos marcados con <strong>*</strong>. Al finalizar, recibirá un PDF para enviar por WhatsApp.
+    </div>
+
+    <!-- SECCIÓN 1: DATOS DEL ALUMNO -->
+    <div class="section-card">
+      <div class="section-title"><span class="section-num">1</span> Datos del Alumno</div>
+
+      <div class="field">
+        <label>Apellido y Nombre completo <span class="req">*</span></label>
+        <input type="text" id="nombre" placeholder="Ej: García, María Laura" autocomplete="name">
+        <div class="error-msg" id="err-nombre">Por favor ingrese su nombre completo.</div>
+      </div>
+
+      <div class="field">
+        <label>DNI / Pasaporte <span class="req">*</span></label>
+        <input type="text" id="dni" placeholder="Ej: 30.123.456" inputmode="numeric">
+        <div class="error-msg" id="err-dni">Por favor ingrese su DNI o Pasaporte.</div>
+      </div>
+
+      <div class="field">
+        <label>Fecha de Nacimiento <span class="req">*</span></label>
+        <input type="date" id="fecha-nac">
+        <div class="error-msg" id="err-fecha-nac">Por favor ingrese su fecha de nacimiento.</div>
+      </div>
+
+      <div class="field">
+        <label>¿Es menor de 18 años? <span class="req">*</span></label>
+        <div class="radio-group">
+          <div class="radio-btn si">
+            <input type="radio" name="menor" id="menor-si" value="SI">
+            <label for="menor-si">SÍ</label>
+          </div>
+          <div class="radio-btn">
+            <input type="radio" name="menor" id="menor-no" value="NO">
+            <label for="menor-no">NO</label>
+          </div>
+        </div>
+        <div class="error-msg" id="err-menor">Por favor seleccione una opción.</div>
+
+        <div class="menores-section hidden" id="menores-section">
+          <div class="section-title-sm">⚠️ Datos del Adulto Responsable (obligatorio)</div>
+          <div class="field">
+            <label>Nombre y Apellido del Adulto Responsable <span class="req">*</span></label>
+            <input type="text" id="adulto-nombre" placeholder="Ej: García, Roberto">
+          </div>
+          <div class="field">
+            <label>DNI del Adulto Responsable <span class="req">*</span></label>
+            <input type="text" id="adulto-dni" placeholder="Ej: 22.456.789" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Vínculo (Padre/Madre/Tutor) <span class="req">*</span></label>
+            <input type="text" id="adulto-vinculo" placeholder="Ej: Madre">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Teléfono de Contacto <span class="req">*</span></label>
+        <input type="tel" id="telefono" placeholder="Ej: 11-4567-8901" inputmode="tel">
+        <div class="error-msg" id="err-telefono">Por favor ingrese un teléfono de contacto.</div>
+      </div>
+
+      <div class="field">
+        <label>Contacto de Emergencia (Nombre y Teléfono) <span class="req">*</span></label>
+        <input type="text" id="emergencia" placeholder="Ej: Juan García - 11-9876-5432">
+        <div class="error-msg" id="err-emergencia">Por favor ingrese un contacto de emergencia.</div>
+      </div>
+
+      <div class="field">
+        <label>Obra Social / Prepaga y N° de Socio</label>
+        <input type="text" id="obra-social" placeholder="Ej: OSDE 210 - N° 12345 (opcional)">
+        <div class="hint">Opcional. Si no posee, deje en blanco.</div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: CUESTIONARIO DE SALUD -->
+    <div class="section-card">
+      <div class="section-title"><span class="section-num">2</span> Cuestionario de Salud</div>
+
+      <div class="hint" style="margin-bottom: 1rem; font-style: italic; color: var(--text);">Por favor responda con total honestidad marcando la opción correspondiente:</div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">1.</span> ¿Su médico le ha dicho alguna vez que padece una afección cardíaca o presión arterial alta?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q1" id="q1-si" value="SI"><label for="q1-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q1" id="q1-no" value="NO"><label for="q1-no">NO</label></div>
+        </div>
+        <div class="error-msg" id="err-q1">Seleccione una opción.</div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">2.</span> ¿Siente dolor u opresión en el pecho cuando realiza actividad física o en reposo?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q2" id="q2-si" value="SI"><label for="q2-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q2" id="q2-no" value="NO"><label for="q2-no">NO</label></div>
+        </div>
+        <div class="error-msg" id="err-q2">Seleccione una opción.</div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">3.</span> ¿Sufre de mareos, pérdida de conocimiento o falta de equilibrio?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q3" id="q3-si" value="SI"><label for="q3-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q3" id="q3-no" value="NO"><label for="q3-no">NO</label></div>
+        </div>
+        <div class="error-msg" id="err-q3">Seleccione una opción.</div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">4.</span> ¿Tiene algún problema óseo, articular o muscular (por ejemplo, en la espalda, rodillas o cadera) que pudiera agravarse por el ejercicio?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q4" id="q4-si" value="SI"><label for="q4-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q4" id="q4-no" value="NO"><label for="q4-no">NO</label></div>
+        </div>
+        <div class="error-msg" id="err-q4">Seleccione una opción.</div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">5.</span> ¿Toma actualmente medicamentos recetados para la presión arterial, el corazón u otra afección crónica?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q5" id="q5-si" value="SI"><label for="q5-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q5" id="q5-no" value="NO"><label for="q5-no">NO</label></div>
+        </div>
+        <div class="error-msg" id="err-q5">Seleccione una opción.</div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">6.</span> En caso de mujeres: ¿Se encuentra usted embarazada?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q6" id="q6-si" value="SI"><label for="q6-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q6" id="q6-no" value="NO"><label for="q6-no">NO</label></div>
+          <div class="radio-btn noapl"><input type="radio" name="q6" id="q6-na" value="NO APLICA"><label for="q6-na">No aplica</label></div>
+        </div>
+        <div class="error-msg" id="err-q6">Seleccione una opción.</div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-text"><span class="question-num">7.</span> ¿Existe alguna otra razón médica o síntoma por la cual considere que no debería realizar actividad física?</div>
+        <div class="radio-group">
+          <div class="radio-btn si"><input type="radio" name="q7" id="q7-si" value="SI"><label for="q7-si">SÍ</label></div>
+          <div class="radio-btn"><input type="radio" name="q7" id="q7-no" value="NO"><label for="q7-no">NO</label></div>
+        </div>
+        <div class="error-msg" id="err-q7">Seleccione una opción.</div>
+      </div>
+
+      <div id="detalle-si-wrap" class="hidden">
+        <label>En caso de haber respondido SÍ a cualquiera de las preguntas anteriores, detalle brevemente aquí: <span class="req">*</span></label>
+        <textarea id="detalle-si" placeholder="Describa brevemente su situación de salud..." rows="3"></textarea>
+        <div class="error-msg" id="err-detalle">Por favor proporcione detalles sobre las respuestas afirmativas.</div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: DECLARACIÓN JURADA Y FIRMA -->
+    <div class="section-card">
+      <div class="section-title"><span class="section-num">3</span> Declaración Jurada y Firma</div>
+
+      <div class="legal-text">
+        El/La abajo firmante declara bajo juramento que los datos consignados son verídicos y completos, que conoce los riesgos inherentes a la práctica de actividad física y que asume plena responsabilidad por su participación. Asimismo, autoriza al personal del establecimiento a actuar en caso de emergencia médica y exime a la institución de toda responsabilidad derivada de la ocultación de información médica relevante.<br><br>
+        Declara haber sido informado/a sobre las características de la actividad, sus riesgos potenciales y las medidas de seguridad vigentes, prestando su consentimiento informado en forma libre y voluntaria.
+      </div>
+
+      <div class="field">
+        <label class="check-label">
+          <input type="checkbox" id="acepto-declaracion">
+          <span>Declaro que toda la información proporcionada es verdadera y asumo los riesgos de la actividad física. <span class="req">*</span></span>
+        </label>
+        <div class="error-msg" id="err-acepto">Debe aceptar la declaración jurada para continuar.</div>
+      </div>
+
+      <div class="signature-area">
+        <div class="sig-label">
+          <span>Firma del declarante <span class="req">*</span></span>
+          <button class="sig-clear" onclick="clearSignature()">✕ Borrar firma</button>
+        </div>
+        <canvas id="sig-canvas" width="500" height="200"></canvas>
+        <div class="sig-hint">Firme con el dedo dentro del recuadro</div>
+        <div class="error-msg" id="err-firma">Por favor firme el documento para continuar.</div>
+      </div>
+
+      <div class="field" style="margin-top: 1rem;">
+        <label>Lugar y Fecha <span class="req">*</span></label>
+        <input type="text" id="lugar-fecha" placeholder="Ej: Buenos Aires, 07/06/2025">
+        <div class="error-msg" id="err-lugar">Por favor ingrese el lugar y fecha.</div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit" onclick="submitForm()">
+        ✅ Completar y Generar PDF
+      </button>
+    </div>
+
+  </div><!-- /form-container -->
+
+  <!-- PANTALLA DE ÉXITO -->
+  <div id="success-screen">
+    <div class="section-card" style="text-align: center; padding: 2rem;">
+      <div class="success-icon">✅</div>
+      <h2 style="font-size: 20px; color: var(--primary); margin-bottom: 0.5rem;">¡Declaración completada!</h2>
+      <p style="font-family: sans-serif; font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem;">Su PDF fue generado. Descárguelo y envíelo por WhatsApp.</p>
+      <button class="btn-pdf" onclick="downloadPDF()">⬇️ Descargar PDF</button>
+      <button class="btn-nuevo" onclick="resetForm()">Completar nueva declaración</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+const { jsPDF } = window.jspdf;
+let pdfDoc = null;
+let sigHasDraw = false;
+
+// Signature canvas
+const canvas = document.getElementById('sig-canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let lastX, lastY;
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  if (e.touches) {
+    return {
+      x: (e.touches[0].clientX - rect.left) * scaleX,
+      y: (e.touches[0].clientY - rect.top) * scaleY
+    };
+  }
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  drawing = true;
+  const pos = getPos(e);
+  lastX = pos.x; lastY = pos.y;
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 1.2, 0, Math.PI * 2);
+  ctx.fillStyle = '#1a3a5c';
+  ctx.fill();
+  sigHasDraw = true;
+  canvas.classList.remove('error');
+}
+
+function draw(e) {
+  if (!drawing) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.strokeStyle = '#1a3a5c';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  lastX = pos.x; lastY = pos.y;
+  sigHasDraw = true;
+}
+
+function stopDraw() { drawing = false; }
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDraw);
+canvas.addEventListener('touchstart', startDraw, { passive: false });
+canvas.addEventListener('touchmove', draw, { passive: false });
+canvas.addEventListener('touchend', stopDraw);
+
+function clearSignature() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  sigHasDraw = false;
+}
+
+// Menores toggle
+document.querySelectorAll('input[name="menor"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const sec = document.getElementById('menores-section');
+    if (r.value === 'SI') sec.classList.remove('hidden');
+    else sec.classList.add('hidden');
+    updateProgress();
+  });
+});
+
+// Detalle SI toggle
+const questions = ['q1','q2','q3','q4','q5','q6','q7'];
+questions.forEach(q => {
+  document.querySelectorAll(`input[name="${q}"]`).forEach(r => {
+    r.addEventListener('change', () => {
+      checkDetalleVisibility();
+      updateProgress();
+    });
+  });
+});
+
+function checkDetalleVisibility() {
+  const hasSi = questions.some(q => {
+    const el = document.querySelector(`input[name="${q}"]:checked`);
+    return el && el.value === 'SI';
+  });
+  const wrap = document.getElementById('detalle-si-wrap');
+  if (hasSi) wrap.classList.remove('hidden');
+  else wrap.classList.add('hidden');
+}
+
+// Progress tracking
+function updateProgress() {
+  const fields = ['nombre','dni','fecha-nac','telefono','emergencia'];
+  let filled = 0;
+  let total = 18;
+  fields.forEach(f => { if (document.getElementById(f).value.trim()) filled++; });
+  if (document.querySelector('input[name="menor"]:checked')) filled++;
+  questions.forEach(q => { if (document.querySelector(`input[name="${q}"]:checked`)) filled++; });
+  if (document.getElementById('acepto-declaracion').checked) filled++;
+  if (sigHasDraw) filled++;
+  if (document.getElementById('lugar-fecha').value.trim()) filled++;
+  const pct = Math.round((filled / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = pct + '% completado';
+}
+
+document.querySelectorAll('input[type="text"], input[type="date"], input[type="tel"], textarea').forEach(el => {
+  el.addEventListener('input', updateProgress);
+});
+document.getElementById('acepto-declaracion').addEventListener('change', updateProgress);
+
+// Validation
+function showError(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (show) el.classList.add('visible');
+  else el.classList.remove('visible');
+}
+
+function setFieldError(id, hasError) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (hasError) el.classList.add('error');
+  else el.classList.remove('error');
+}
+
+function validateForm() {
+  let valid = true;
+
+  const nombre = document.getElementById('nombre').value.trim();
+  setFieldError('nombre', !nombre); showError('err-nombre', !nombre);
+  if (!nombre) valid = false;
+
+  const dni = document.getElementById('dni').value.trim();
+  setFieldError('dni', !dni); showError('err-dni', !dni);
+  if (!dni) valid = false;
+
+  const fechaNac = document.getElementById('fecha-nac').value;
+  setFieldError('fecha-nac', !fechaNac); showError('err-fecha-nac', !fechaNac);
+  if (!fechaNac) valid = false;
+
+  const menorChecked = document.querySelector('input[name="menor"]:checked');
+  showError('err-menor', !menorChecked);
+  if (!menorChecked) valid = false;
+
+  if (menorChecked && menorChecked.value === 'SI') {
+    const an = document.getElementById('adulto-nombre').value.trim();
+    const ad = document.getElementById('adulto-dni').value.trim();
+    const av = document.getElementById('adulto-vinculo').value.trim();
+    if (!an || !ad || !av) { valid = false; }
+  }
+
+  const tel = document.getElementById('telefono').value.trim();
+  setFieldError('telefono', !tel); showError('err-telefono', !tel);
+  if (!tel) valid = false;
+
+  const emer = document.getElementById('emergencia').value.trim();
+  setFieldError('emergencia', !emer); showError('err-emergencia', !emer);
+  if (!emer) valid = false;
+
+  questions.forEach(q => {
+    const checked = document.querySelector(`input[name="${q}"]:checked`);
+    showError(`err-${q}`, !checked);
+    if (!checked) valid = false;
+  });
+
+  const hasSi = questions.some(q => {
+    const el = document.querySelector(`input[name="${q}"]:checked`);
+    return el && el.value === 'SI';
+  });
+  if (hasSi) {
+    const det = document.getElementById('detalle-si').value.trim();
+    setFieldError('detalle-si', !det); showError('err-detalle', !det);
+    if (!det) valid = false;
+  }
+
+  const acepto = document.getElementById('acepto-declaracion').checked;
+  showError('err-acepto', !acepto);
+  if (!acepto) valid = false;
+
+  showError('err-firma', !sigHasDraw);
+  if (sigHasDraw) canvas.classList.remove('error');
+  else { canvas.classList.add('error'); valid = false; }
+
+  const lugar = document.getElementById('lugar-fecha').value.trim();
+  setFieldError('lugar-fecha', !lugar); showError('err-lugar', !lugar);
+  if (!lugar) valid = false;
+
+  return valid;
+}
+
+function submitForm() {
+  if (!validateForm()) {
+    const firstErr = document.querySelector('.error-msg.visible, input.error, canvas.error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  document.getElementById('loading-overlay').classList.add('visible');
+  setTimeout(() => {
+    buildPDF();
+    document.getElementById('loading-overlay').classList.remove('visible');
+    document.getElementById('form-container').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo(0, 0);
+  }, 800);
+}
+
+function buildPDF() {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const marginL = 20, marginR = 20, pageW = 210;
+  const contentW = pageW - marginL - marginR;
+  let y = 20;
+
+  function checkPage(needed = 10) {
+    if (y + needed > 270) { doc.addPage(); y = 20; }
+  }
+
+  function addText(text, x, size, style, color, maxW) {
+    doc.setFontSize(size);
+    doc.setFont('helvetica', style || 'normal');
+    doc.setTextColor(...(color || [30, 30, 30]));
+    if (maxW) {
+      const lines = doc.splitTextToSize(text, maxW);
+      doc.text(lines, x, y);
+      return lines.length * (size * 0.4 + 1);
+    }
+    doc.text(text, x, y);
+    return size * 0.4 + 1;
+  }
+
+  // Header
+  doc.setFillColor(26, 58, 92);
+  doc.rect(0, 0, 210, 36, 'F');
+  doc.setFontSize(15);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('DECLARACIÓN JURADA DE SALUD Y ASUNCIÓN DE RIESGO', 105, 14, { align: 'center' });
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Conforme Ley N° 5.397 (CABA) / Ley N° 12.329 (Provincia de Buenos Aires)', 105, 21, { align: 'center' });
+  doc.setFontSize(8);
+  doc.setTextColor(180, 200, 220);
+  doc.text('Documento generado digitalmente – Original válido', 105, 27, { align: 'center' });
+  y = 44;
+
+  // Section helper
+  function sectionHeader(num, title) {
+    checkPage(14);
+    doc.setFillColor(232, 240, 248);
+    doc.rect(marginL - 2, y - 5, contentW + 4, 9, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(26, 58, 92);
+    doc.text(`${num}. ${title.toUpperCase()}`, marginL, y);
+    y += 8;
+  }
+
+  function field(label, value) {
+    checkPage(10);
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text(label + ':', marginL, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+    const lines = doc.splitTextToSize(value || '—', contentW - 55);
+    doc.text(lines, marginL + 55, y);
+    y += Math.max(6, lines.length * 5);
+  }
+
+  // 1. Datos del alumno
+  sectionHeader(1, 'Datos del Alumno');
+  field('Apellido y Nombre', document.getElementById('nombre').value.trim());
+  field('DNI / Pasaporte', document.getElementById('dni').value.trim());
+  field('Fecha de Nacimiento', document.getElementById('fecha-nac').value);
+  const menorVal = document.querySelector('input[name="menor"]:checked')?.value || '—';
+  field('¿Es menor de 18 años?', menorVal);
+  if (menorVal === 'SI') {
+    field('Adulto Responsable', document.getElementById('adulto-nombre').value.trim());
+    field('DNI Adulto Responsable', document.getElementById('adulto-dni').value.trim());
+    field('Vínculo', document.getElementById('adulto-vinculo').value.trim());
+  }
+  field('Teléfono de Contacto', document.getElementById('telefono').value.trim());
+  field('Contacto de Emergencia', document.getElementById('emergencia').value.trim());
+  const obraSocial = document.getElementById('obra-social').value.trim();
+  field('Obra Social / Prepaga', obraSocial || 'No posee');
+  y += 4;
+
+  // 2. Cuestionario
+  sectionHeader(2, 'Cuestionario de Salud');
+  const qTexts = [
+    '¿Padece afección cardíaca o presión arterial alta?',
+    '¿Siente dolor u opresión en el pecho durante actividad física o en reposo?',
+    '¿Sufre de mareos, pérdida de conocimiento o falta de equilibrio?',
+    '¿Tiene problemas óseos, articulares o musculares que el ejercicio pueda agravar?',
+    '¿Toma medicamentos para la presión, el corazón u otra afección crónica?',
+    '¿Se encuentra embarazada? (solo mujeres)',
+    '¿Existe otra razón médica por la que no debería realizar actividad física?'
+  ];
+  questions.forEach((q, i) => {
+    checkPage(8);
+    const ans = document.querySelector(`input[name="${q}"]:checked`)?.value || '—';
+    const color = ans === 'SI' ? [192, 57, 43] : ans === 'NO' ? [46, 125, 94] : [80, 80, 80];
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+    const lines = doc.splitTextToSize(`${i+1}. ${qTexts[i]}`, contentW - 20);
+    doc.text(lines, marginL, y);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...color);
+    doc.text(`[ ${ans} ]`, pageW - marginR, y, { align: 'right' });
+    y += lines.length * 4.5 + 2;
+  });
+
+  const det = document.getElementById('detalle-si').value.trim();
+  if (det) {
+    checkPage(20);
+    y += 2;
+    doc.setFillColor(253, 236, 234);
+    const detLines = doc.splitTextToSize(det, contentW - 10);
+    const boxH = detLines.length * 5 + 14;
+    doc.rect(marginL - 2, y - 5, contentW + 4, boxH, 'F');
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(192, 57, 43);
+    doc.text('Detalle de respuestas afirmativas:', marginL, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 30, 20);
+    doc.text(detLines, marginL, y);
+    y += detLines.length * 5 + 6;
+  }
+  y += 4;
+
+  // 3. Declaración y firma
+  sectionHeader(3, 'Declaración Jurada y Consentimiento');
+  checkPage(30);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor(60, 60, 60);
+  const legalText = 'El/La abajo firmante declara bajo juramento que los datos consignados son verídicos y completos, que conoce los riesgos inherentes a la práctica de actividad física y que asume plena responsabilidad por su participación. Asimismo, autoriza al personal del establecimiento a actuar en caso de emergencia médica y exime a la institución de toda responsabilidad derivada de la ocultación de información médica relevante.';
+  const legalLines = doc.splitTextToSize(legalText, contentW);
+  doc.text(legalLines, marginL, y);
+  y += legalLines.length * 4.2 + 8;
+
+  // Firma
+  checkPage(55);
+  const sigDataUrl = canvas.toDataURL('image/png');
+  doc.setDrawColor(26, 58, 92);
+  doc.setLineWidth(0.3);
+  doc.rect(marginL, y, contentW, 40);
+  doc.addImage(sigDataUrl, 'PNG', marginL + 2, y + 2, contentW - 4, 36);
+  y += 42;
+
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(30, 30, 30);
+  field('Lugar y Fecha', document.getElementById('lugar-fecha').value.trim());
+
+  // Footer
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(150, 150, 150);
+  doc.text(`Documento generado el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')}`, 105, 285, { align: 'center' });
+  doc.text('Declaración Jurada de Salud y Asunción de Riesgo', 105, 289, { align: 'center' });
+
+  pdfDoc = doc;
+}
+
+function downloadPDF() {
+  if (pdfDoc) {
+    const nombre = document.getElementById('nombre').value.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').replace(/\s+/g, '_');
+    pdfDoc.save(`Declaracion_Jurada_${nombre || 'salud'}.pdf`);
+  }
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type="text"], input[type="date"], input[type="tel"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => el.checked = false);
+  clearSignature();
+  document.getElementById('menores-section').classList.add('hidden');
+  document.getElementById('detalle-si-wrap').classList.add('hidden');
+  document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.error').forEach(e => e.classList.remove('error'));
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-label').textContent = '0% completado';
+  pdfDoc = null;
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('form-container').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+// Set today's date as default
+const today = new Date();
+const dd = String(today.getDate()).padStart(2,'0');
+const mm = String(today.getMonth()+1).padStart(2,'0');
+const yyyy = today.getFullYear();
+document.getElementById('lugar-fecha').value = `Buenos Aires, ${dd}/${mm}/${yyyy}`;
+updateProgress();
+</script>
+</body>
+</html>
