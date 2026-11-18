@@ -1115,8 +1115,12 @@ function buildPDF() {
 
 function downloadPDF() {
   if (pdfDoc) {
-    const nombre = document.getElementById('nombre').value.trim().replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').replace(/\s+/g, '_');
-    pdfDoc.save(`Declaracion_Jurada_${nombre || 'salud'}.pdf`);
+    const limpiar = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const dni = limpiar(document.getElementById('dni').value);
+    const nombreCompleto = document.getElementById('nombre').value.trim();
+    // El formato pedido es "Apellido, Nombre": se toma lo que está antes de la coma (o la primera palabra si no hay coma)
+    const apellido = limpiar(nombreCompleto.includes(',') ? nombreCompleto.split(',')[0] : nombreCompleto.split(/\s+/)[0]);
+    pdfDoc.save(`${dni || 'SINDNI'}_${apellido || 'SINAPELLIDO'}.pdf`);
   }
 }
 
